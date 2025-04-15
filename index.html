@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report a Disaster</title>
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #e9ecef;
+            --text-color: #212529;
+            --accent-color: #dc3545;
+            --accent-hover: #c82333;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --card-radius: 20px;
+            --button-radius: 12px;
+            --input-radius: 12px;
+            --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --gradient-primary: linear-gradient(135deg, #dc3545, #c82333);
+            --gradient-success: linear-gradient(135deg, #28a745, #218838);
+        }
+
+        /* Dark mode variables */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-bg: #121212;
+                --secondary-bg: #1e1e1e;
+                --text-color: #f8f9fa;
+                --shadow-color: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
+
+        /* Modern Card Style */
+        .report-card {
+            background-color: var(--secondary-bg);
+            border-radius: var(--card-radius);
+            padding: 30px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                0 1px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        /* Enhanced Disaster Type Selection */
+        .disaster-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .disaster-type {
+            background: var(--primary-bg);
+            border-radius: var(--input-radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .disaster-type:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .disaster-type.selected {
+            border-color: var(--accent-color);
+            background: rgba(220, 53, 69, 0.1);
+            box-shadow: 0 8px 15px rgba(220, 53, 69, 0.2);
+        }
+
+        .disaster-type svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+        }
+
+        .disaster-type span {
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Modern Form Elements */
+        textarea,
+        .location-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid transparent;
+            background-color: var(--primary-bg);
+            border-radius: var(--input-radius);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        textarea:focus,
+        .location-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: none;
+        }
+
+        .location-group {
+            position: relative;
+        }
+
+        .location-input {
+            padding-right: 40px;
+        }
+
+        .location-icon {
+            position: absolute;
+            right: 15px;
+            top: 43px;
+            cursor: pointer;
+        }
+
+        /* Modern Map Container */
+        .map-container {
+            margin-top: 15px;
+            width: 100%;
+            height: 200px;
+            background-color: var(--primary-bg);
+            border-radius: var(--input-radius);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23dc3545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>') center/contain no-repeat;
+            opacity: 0.1;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .upload-option {
+            flex: 1;
+            background-color: var(--primary-bg);
+            border-radius: var(--input-radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 6px var(--shadow-color),
+                      -3px -3px 6px rgba(255, 255, 255, 0.05);
+        }
+
+        .upload-option:hover {
+            transform: translateY(-3px);
+        }
+
+        .upload-option svg {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+
+        .upload-option span {
+            font-size: 14px;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+            position: relative;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 150px;
+            border-radius: var(--input-radius);
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Modern Submit Button */
+        .submit-button {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--button-radius);
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+        }
+
+        .submit-button .button-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-button .button-ripple {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            opacity: 1;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Confirmation Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            border-radius: var(--card-radius);
+            padding: 30px;
+            text-align: center;
+            max-width: 90%;
+            width: 320px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .checkmark-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: #6c757d;
+        }
+
+        .modal-button {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: var(--button-radius);
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-button:hover {
+            background-color: #218838;
+        }
+
+        /* Loading */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .button-text {
+            display: inline-block;
+        }
+
+        /* Utilities */
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: transform 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Report a Disaster</h1>
+            <p class="subtitle">Quickly report what you're witnessing</p>
+        </header>
+
+        <form id="disaster-report-form" class="report-card">
+            <!-- Disaster Type Selection -->
+            <div class="form-group">
+                <label>Type of Disaster</label>
+                <div class="disaster-types">
+                    <div class="disaster-type" data-type="earthquake">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 12h2"></path>
+                            <path d="M6 8h2"></path>
+                            <path d="M10 4h2"></path>
+                            <path d="M14 8h2"></path>
+                            <path d="M18 12h2"></path>
+                            <path d="M10 20h2"></path>
+                            <path d="M6 16h2"></path>
+                            <path d="M14 16h2"></path>
+                        </svg>
+                        <span>Earthquake</span>
+                    </div>
+                    <div class="disaster-type" data-type="flood">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 16.5a6 3 0 1 0 12 0c0-3-4-10-6-12-2 2-6 9-6 12z"></path>
+                            <path d="M4 19.5a2 1 0 1 0 4 0c0-1-2-3-2-3s-2 2-2 3z"></path>
+                        </svg>
+                        <span>Flood</span>
+                    </div>
+                    <div class="disaster-type" data-type="fire">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3s.5-1.5 1-2.5c.5 1 1 1.5 2 2.5 2 2 2 3.5 2 4.5a4 4 0 0 1-8 0z"></path>
+                            <path d="M12 9v3"></path>
+                        </svg>
+                        <span>Fire</span>
+                    </div>
+                    <div class="disaster-type" data-type="storm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 16a2 2 0
+                            0 1-4 0"></path>
+                            <path d="M10 6H5.5a2.5 2.5 0 0 0 0 5H8"></path>
+                            <path d="M14 6h4.5a2.5 2.5 0 0 1 0 5H16"></path>
+                            <path d="M19 10m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                            <path d="M5 10m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                            <path d="M12 16v4"></path>
+                            <path d="M12 2v4"></path>
+                        </svg>
+                        <span>Storm</span>
+                    </div>
+                    <div class="disaster-type" data-type="other">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Other</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Describe what you see (optional)</label>
+                <textarea id="description" placeholder="Provide any details that might help emergency responders..."></textarea>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group location-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" class="location-input" value="KLS VDIT, Haliyal, Karnataka, India" readonly>
+                <div class="location-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+
+                <div class="map-container">
+                    <img src="Screenshot 2025-04-15 213720.png" alt="KLS VDIT Haliyal Location" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--input-radius);">
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group">
+                <label>Add a photo (optional)</label>
+                <div class="image-upload">
+                    <div class="upload-option" id="camera-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+                            <circle cx="12" cy="13" r="3"></circle>
+                        </svg>
+                        <span>Camera</span>
+                    </div>
+                    <div class="upload-option" id="gallery-option">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <span>Gallery</span>
+                    </div>
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <div class="preview-container" id="preview-container">
+                    <img class="image-preview" id="image-preview" src="" alt="Preview">
+                    <div class="remove-image" id="remove-image">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button" id="submit-button">
+                <div class="button-content">
+                    <span class="loading-spinner" id="loading-spinner"></span>
+                    <span class="button-text">Submit Report</span>
+                </div>
+            </button>
+        </form>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmation-modal">
+        <div class="modal-content">
+            <div class="checkmark-container">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h2>Thank you!</h2>
+            <p>Your disaster report has been submitted. Emergency services have been notified.</p>
+            <p>Stay safe and follow any emergency guidelines.</p>
+            <button class="modal-button" id="close-modal">OK</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const disasterTypes = document.querySelectorAll('.disaster-type');
+            const fileInput = document.getElementById('file-input');
+            const cameraOption = document.getElementById('camera-option');
+            const galleryOption = document.getElementById('gallery-option');
+            const imagePreview = document.getElementById('image-preview');
+            const previewContainer = document.getElementById('preview-container');
+            const removeImage = document.getElementById('remove-image');
+            const submitButton = document.getElementById('submit-button');
+            const form = document.getElementById('disaster-report-form');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const modal = document.getElementById('confirmation-modal');
+            const closeModal = document.getElementById('close-modal');
+            
+            // Variables
+            let selectedDisasterType = null;
+            let hasImage = false;
+            
+            // Disaster Type Selection
+            disasterTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    disasterTypes.forEach(t => t.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedDisasterType = this.dataset.type;
+                });
+            });
+            
+            // Image Upload
+            cameraOption.addEventListener('click', function() {
+                fileInput.setAttribute('capture', 'environment');
+                fileInput.click();
+            });
+            
+            galleryOption.addEventListener('click', function() {
+                fileInput.removeAttribute('capture');
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const url = URL.createObjectURL(file);
+                    imagePreview.src = url;
+                    previewContainer.style.display = 'block';
+                    hasImage = true;
+                }
+            });
+            
+            removeImage.addEventListener('click', function() {
+                imagePreview.src = '';
+                previewContainer.style.display = 'none';
+                fileInput.value = '';
+                hasImage = false;
+            });
+            
+            // Form Submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validation - Check if disaster type is selected
+                if (!selectedDisasterType) {
+                    alert('Please select a disaster type.');
+                    return;
+                }
+                
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                ripple.classList.add('button-ripple');
+                submitButton.appendChild(ripple);
+                
+                // Show loading state
+                loadingSpinner.style.display = 'inline-block';
+                submitButton.disabled = true;
+                
+                // Simulate form submission
+                setTimeout(() => {
+                    // Remove ripple
+                    ripple.remove();
+                    
+                    // Hide loading
+                    loadingSpinner.style.display = 'none';
+                    
+                    // Show confirmation
+                    modal.classList.add('show');
+                    
+                    // Re-enable button
+                    submitButton.disabled = false;
+                }, 2000);
+            });
+            
+            // Close Modal
+            closeModal.addEventListener('click', function() {
+                modal.classList.remove('show');
+                
+                // Reset form
+                form.reset();
+                disasterTypes.forEach(t => t.classList.remove('selected'));
+                selectedDisasterType = null;
+                imagePreview.src = '';
+                previewContainer.style.display = 'none';
+                hasImage = false;
+            });
+        });
+    </script>
+</body>
+</html>
